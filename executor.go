@@ -11,5 +11,5 @@ type executor interface {
 
 	get(ctx context.Context, domain string, rr string, options *options) (record *Record, err error)
 
-	update(_ context.Context, record *Record, rr string, value string, options *options) (err error)
+	update(_ context.Context, record *Record, value string, options *options) (err error)
 }

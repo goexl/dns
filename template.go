@@ -11,15 +11,60 @@ type template struct {
 }
 
 func (t *template) Add(ctx context.Context, domain string, rr string, value string, opts ...option) (err error) {
-	options := defaultOptions
+	_options := defaultOptions()
 	for _, opt := range opts {
-		opt.apply(options)
+		opt.apply(_options)
 	}
 
-	key := t.key(path, options.environment, options.separator)
-	switch options.uoaType {
-	case TypeCos:
-		exist, err = t.cos.exist(ctx, key, options)
+	switch _options.mode {
+	case modeAliyun:
+		err = t.aliyun.add(ctx, domain, rr, value, _options)
+	}
+
+	return
+}
+
+func (t *template) Resolve(
+	ctx context.Context,
+	domain string, rr string, value string,
+	opts ...option,
+) (result *Result, err error) {
+	_options := defaultOptions()
+	for _, opt := range opts {
+		opt.apply(_options)
+	}
+
+	switch _options.mode {
+	case modeAliyun:
+		result, err = t.aliyun.resolve(ctx, domain, rr, value, _options)
+	}
+
+	return
+}
+
+func (t *template) Get(ctx context.Context, domain string, rr string, opts ...option) (record *Record, err error) {
+	_options := defaultOptions()
+	for _, opt := range opts {
+		opt.apply(_options)
+	}
+
+	switch _options.mode {
+	case modeAliyun:
+		record, err = t.aliyun.get(ctx, domain, rr, _options)
+	}
+
+	return
+}
+
+func (t *template) Update(ctx context.Context, record *Record, value string, opts ...option) (err error) {
+	_options := defaultOptions()
+	for _, opt := range opts {
+		opt.apply(_options)
+	}
+
+	switch _options.mode {
+	case modeAliyun:
+		err = t.aliyun.update(ctx, record, value, _options)
 	}
 
 	return

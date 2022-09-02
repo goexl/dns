@@ -25,7 +25,7 @@ func (a *aliyun) resolve(
 	if record, getErr := a.get(ctx, domain, rr, options); nil != getErr {
 		err = getErr
 	} else if nil != record {
-		err = a.update(ctx, record, rr, value, options)
+		err = a.update(ctx, record, value, options)
 	} else {
 		err = a.add(ctx, domain, rr, value, options)
 	}
@@ -33,10 +33,10 @@ func (a *aliyun) resolve(
 	return
 }
 
-func (a *aliyun) update(_ context.Context, record *Record, rr string, value string, options *options) (err error) {
+func (a *aliyun) update(_ context.Context, record *Record, value string, options *options) (err error) {
 	req := alidns.CreateUpdateDomainRecordRequest()
 	req.RecordId = record.Id
-	req.RR = rr
+	req.RR = record.Subdomain
 	req.Type = options.typ
 	req.Value = value
 	req.TTL = requests.NewInteger(int(options.ttl.Seconds()))
