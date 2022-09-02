@@ -1,6 +1,8 @@
 package uda
 
 import (
+	"time"
+
 	"github.com/goexl/gox"
 )
 
@@ -11,5 +13,7 @@ type (
 
 	options struct {
 		secret gox.Secret
+		typ    Type
+		ttl    time.Duration
 	}
 )
