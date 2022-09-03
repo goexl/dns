@@ -80,9 +80,25 @@ func (a *aliyun) get(_ context.Context, domain string, rr string, options *optio
 				record.Id = _record.RecordId
 				record.Name = _record.DomainName
 				record.Subdomain = _record.RR
+				record.Type = _record.Type
 				record.Value = _record.Value
 			}
 		}
+	}
+
+	return
+}
+
+func (a *aliyun) delete(_ context.Context, record *Record, options *options) (err error) {
+	req := alidns.CreateDeleteDomainRecordRequest()
+	req.RecordId = record.Id
+
+	if client, clientErr := a.getClient(options.secret.Ak, options.secret.Sk); nil != clientErr {
+		err = clientErr
+	} else if rsp, addErr := client.DeleteDomainRecord(req); nil != addErr {
+		err = addErr
+	} else if nil != rsp && !rsp.IsSuccess() {
+		err = exc.NewFields(`删除域名解析记录出错`, field.String(`domain`, record.Final()))
 	}
 
 	return
