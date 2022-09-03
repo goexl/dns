@@ -23,31 +23,15 @@ func newAliyun() *aliyun {
 	}
 }
 
-func (a *aliyun) resolve(
-	ctx context.Context,
-	domain string, rr string, value string,
-	options *options,
-) (result *Result, err error) {
-	if record, getErr := a.get(ctx, domain, rr, options); nil != getErr {
-		err = getErr
-	} else if nil != record {
-		err = a.update(ctx, record, value, options)
-	} else {
-		err = a.add(ctx, domain, rr, value, options)
-	}
-
-	return
-}
-
 func (a *aliyun) update(_ context.Context, record *Record, value string, options *options) (err error) {
 	req := alidns.CreateUpdateDomainRecordRequest()
 	req.RecordId = record.Id
 	req.RR = record.Subdomain
-	req.Type = options.typ
+	req.Type = string(options.typ)
 	req.Value = value
 	req.TTL = requests.NewInteger(int(options.ttl.Seconds()))
 
-	if client, clientErr := a.getClient(options.secret.Id, options.secret.Key); nil != clientErr {
+	if client, clientErr := a.getClient(options.secret.Ak, options.secret.Sk); nil != clientErr {
 		err = clientErr
 	} else if rsp, updateErr := client.UpdateDomainRecord(req); nil != updateErr {
 		err = updateErr
@@ -62,11 +46,11 @@ func (a *aliyun) add(_ context.Context, domain string, rr string, value string, 
 	req := alidns.CreateAddDomainRecordRequest()
 	req.DomainName = domain
 	req.RR = rr
-	req.Type = options.typ
+	req.Type = string(options.typ)
 	req.Value = value
 	req.TTL = requests.NewInteger(int(options.ttl.Seconds()))
 
-	if client, clientErr := a.getClient(options.secret.Id, options.secret.Key); nil != clientErr {
+	if client, clientErr := a.getClient(options.secret.Ak, options.secret.Sk); nil != clientErr {
 		err = clientErr
 	} else if rsp, addErr := client.AddDomainRecord(req); nil != addErr {
 		err = addErr
@@ -81,9 +65,9 @@ func (a *aliyun) get(_ context.Context, domain string, rr string, options *optio
 	req := alidns.CreateDescribeDomainRecordsRequest()
 	req.DomainName = domain
 	req.RRKeyWord = rr
-	req.TypeKeyWord = options.typ
+	req.TypeKeyWord = string(options.typ)
 
-	if client, clientErr := a.getClient(options.secret.Id, options.secret.Key); nil != clientErr {
+	if client, clientErr := a.getClient(options.secret.Ak, options.secret.Sk); nil != clientErr {
 		err = clientErr
 	} else if rsp, getErr := client.DescribeDomainRecords(req); nil != getErr {
 		err = getErr
@@ -91,7 +75,7 @@ func (a *aliyun) get(_ context.Context, domain string, rr string, options *optio
 		err = exc.NewFields(`获取域名解析记录出错`, field.String(`domain`, fmt.Sprintf(`%s.%s`, domain, rr)))
 	} else {
 		for _, _record := range rsp.DomainRecords.Record {
-			if domain == _record.DomainName && options.typ == _record.Type && rr == _record.RR {
+			if domain == _record.DomainName && string(options.typ) == _record.Type && rr == _record.RR {
 				record = new(Record)
 				record.Id = _record.RecordId
 				record.Name = _record.DomainName
@@ -106,7 +90,10 @@ func (a *aliyun) get(_ context.Context, domain string, rr string, options *optio
 
 func (a *aliyun) getClient(key string, secret string) (client *alidns.Client, err error) {
 	if cacheClient, ok := a.clients[key]; !ok {
-		a.clients[key], err = alidns.NewClientWithAccessKey("cn-hangzhou", key, secret)
+		if client, err = alidns.NewClientWithAccessKey("cn-hangzhou", key, secret); nil != err {
+			return
+		}
+		a.clients[key] = client
 	} else {
 		client = cacheClient
 	}

@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1755
 	github.com/goexl/exc v0.0.4
-	github.com/goexl/gox v0.0.8
+	github.com/goexl/gox v0.0.9
 )
 
 require (

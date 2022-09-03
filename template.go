@@ -20,7 +20,7 @@ func newTemplate(options *options) *template {
 	}
 }
 
-func (t *template) Add(ctx context.Context, domain string, rr string, value string, opts ...option) (err error) {
+func (t *template) Add(ctx context.Context, domain string, subdomain string, value string, opts ...option) (err error) {
 	_options := t.options.clone()
 	for _, opt := range opts {
 		opt.apply(_options)
@@ -28,7 +28,7 @@ func (t *template) Add(ctx context.Context, domain string, rr string, value stri
 
 	switch _options.mode {
 	case modeAliyun:
-		err = t.aliyun.add(ctx, domain, rr, value, _options)
+		err = t.aliyun.add(ctx, domain, subdomain, value, _options)
 	}
 
 	return
@@ -36,23 +36,31 @@ func (t *template) Add(ctx context.Context, domain string, rr string, value stri
 
 func (t *template) Resolve(
 	ctx context.Context,
-	domain string, rr string, value string,
+	domain string, subdomain string, value string,
 	opts ...option,
-) (result *Result, err error) {
+) (original string, do bool, err error) {
 	_options := t.options.clone()
 	for _, opt := range opts {
 		opt.apply(_options)
 	}
 
-	switch _options.mode {
-	case modeAliyun:
-		result, err = t.aliyun.resolve(ctx, domain, rr, value, _options)
+	if record, getErr := t.Get(ctx, domain, subdomain, opts...); nil != getErr {
+		err = getErr
+	} else if nil != record {
+		original = record.Value
+		if value != record.Value {
+			do = true
+			err = t.Update(ctx, record, value, opts...)
+		}
+	} else {
+		do = true
+		err = t.Add(ctx, domain, subdomain, value, opts...)
 	}
 
 	return
 }
 
-func (t *template) Get(ctx context.Context, domain string, rr string, opts ...option) (record *Record, err error) {
+func (t *template) Get(ctx context.Context, domain string, subdomain string, opts ...option) (record *Record, err error) {
 	_options := t.options.clone()
 	for _, opt := range opts {
 		opt.apply(_options)
@@ -60,7 +68,7 @@ func (t *template) Get(ctx context.Context, domain string, rr string, opts ...op
 
 	switch _options.mode {
 	case modeAliyun:
-		record, err = t.aliyun.get(ctx, domain, rr, _options)
+		record, err = t.aliyun.get(ctx, domain, subdomain, _options)
 	}
 
 	return
