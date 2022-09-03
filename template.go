@@ -8,10 +8,20 @@ import (
 // 使用模板方法设计模式
 type template struct {
 	aliyun executor
+
+	options *options
+}
+
+func newTemplate(options *options) *template {
+	return &template{
+		aliyun: newAliyun(),
+
+		options: options,
+	}
 }
 
 func (t *template) Add(ctx context.Context, domain string, rr string, value string, opts ...option) (err error) {
-	_options := defaultOptions()
+	_options := t.options.clone()
 	for _, opt := range opts {
 		opt.apply(_options)
 	}
@@ -29,7 +39,7 @@ func (t *template) Resolve(
 	domain string, rr string, value string,
 	opts ...option,
 ) (result *Result, err error) {
-	_options := defaultOptions()
+	_options := t.options.clone()
 	for _, opt := range opts {
 		opt.apply(_options)
 	}
@@ -43,7 +53,7 @@ func (t *template) Resolve(
 }
 
 func (t *template) Get(ctx context.Context, domain string, rr string, opts ...option) (record *Record, err error) {
-	_options := defaultOptions()
+	_options := t.options.clone()
 	for _, opt := range opts {
 		opt.apply(_options)
 	}
@@ -57,7 +67,7 @@ func (t *template) Get(ctx context.Context, domain string, rr string, opts ...op
 }
 
 func (t *template) Update(ctx context.Context, record *Record, value string, opts ...option) (err error) {
-	_options := defaultOptions()
+	_options := t.options.clone()
 	for _, opt := range opts {
 		opt.apply(_options)
 	}

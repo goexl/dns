@@ -17,6 +17,12 @@ type aliyun struct {
 	clients map[string]*alidns.Client
 }
 
+func newAliyun() *aliyun {
+	return &aliyun{
+		clients: make(map[string]*alidns.Client),
+	}
+}
+
 func (a *aliyun) resolve(
 	ctx context.Context,
 	domain string, rr string, value string,

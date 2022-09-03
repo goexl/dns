@@ -16,5 +16,5 @@ type Resolver interface {
 	Get(ctx context.Context, domain string, value string, opts ...option) (record *Record, err error)
 
 	// Update 更新域名记录
-	Update(ctx context.Context, record *Record, rr string, value string, opts ...option) (err error)
+	Update(ctx context.Context, record *Record, value string, opts ...option) (err error)
 }

@@ -26,3 +26,11 @@ func defaultOptions() *options {
 		ttl:  10 * time.Minute,
 	}
 }
+
+func (o *options) clone() *options {
+	return &options{
+		mode: o.mode,
+		typ:  o.typ,
+		ttl:  o.ttl,
+	}
+}
