@@ -59,8 +59,9 @@ func (c *Client) Resolve(
 		}
 	} else {
 		do = true
-		// 先删除记录，不然会报重复错误
-		_ = c.Delete(ctx, record, opts...)
+		if nil != record { // 先删除记录，不然会报重复错误
+			_ = c.Delete(ctx, record, opts...)
+		}
 		err = c.Add(ctx, domain, subdomain, value, opts...)
 	}
 
