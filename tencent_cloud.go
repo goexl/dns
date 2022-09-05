@@ -3,27 +3,31 @@ package dns
 import (
 	"context"
 	"fmt"
-
-	"github.com/goexl/exc"
-	"github.com/goexl/gox/field"
+	"strconv"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
+	"github.com/goexl/exc"
+	"github.com/goexl/gox/field"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/regions"
+	dnspod "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod/v20210323"
 )
 
-var _ executor = (*aliyun)(nil)
+var _ executor = (*tencentCloud)(nil)
 
-type aliyun struct {
-	clients map[string]*alidns.Client
+type tencentCloud struct {
+	clients map[string]*dnspod.Client
 }
 
-func newAliyun() *aliyun {
-	return &aliyun{
-		clients: make(map[string]*alidns.Client),
+func newTencentCloud() *tencentCloud {
+	return &tencentCloud{
+		clients: make(map[string]*dnspod.Client),
 	}
 }
 
-func (a *aliyun) update(_ context.Context, record *Record, value string, options *options) (err error) {
+func (a *tencentCloud) update(_ context.Context, record *Record, value string, options *options) (err error) {
 	req := alidns.CreateUpdateDomainRecordRequest()
 	req.RecordId = record.Id
 	req.RR = record.Subdomain
@@ -33,8 +37,8 @@ func (a *aliyun) update(_ context.Context, record *Record, value string, options
 
 	if client, clientErr := a.getClient(options.secret.Ak, options.secret.Sk); nil != clientErr {
 		err = clientErr
-	} else if rsp, ue := client.UpdateDomainRecord(req); nil != ue {
-		err = ue
+	} else if rsp, updateErr := client.UpdateDomainRecord(req); nil != updateErr {
+		err = updateErr
 	} else if nil != rsp && !rsp.IsSuccess() {
 		err = exc.NewFields(`更新域名解析记录出错`, field.String(`value`, value))
 	}
@@ -42,7 +46,7 @@ func (a *aliyun) update(_ context.Context, record *Record, value string, options
 	return
 }
 
-func (a *aliyun) add(_ context.Context, domain string, rr string, value string, options *options) (err error) {
+func (a *tencentCloud) add(_ context.Context, domain string, rr string, value string, options *options) (err error) {
 	req := alidns.CreateAddDomainRecordRequest()
 	req.DomainName = domain
 	req.RR = rr
@@ -52,8 +56,8 @@ func (a *aliyun) add(_ context.Context, domain string, rr string, value string, 
 
 	if client, clientErr := a.getClient(options.secret.Ak, options.secret.Sk); nil != clientErr {
 		err = clientErr
-	} else if rsp, ae := client.AddDomainRecord(req); nil != ae {
-		err = ae
+	} else if rsp, addErr := client.AddDomainRecord(req); nil != addErr {
+		err = addErr
 	} else if nil != rsp && !rsp.IsSuccess() {
 		err = exc.NewFields(`添加域名解析记录出错`, field.String(`value`, value))
 	}
@@ -61,7 +65,7 @@ func (a *aliyun) add(_ context.Context, domain string, rr string, value string, 
 	return
 }
 
-func (a *aliyun) get(_ context.Context, domain string, rr string, options *options) (record *Record, err error) {
+func (a *tencentCloud) get(_ context.Context, domain string, rr string, options *options) (record *Record, err error) {
 	req := alidns.CreateDescribeDomainRecordsRequest()
 	req.DomainName = domain
 	req.RRKeyWord = rr
@@ -69,8 +73,8 @@ func (a *aliyun) get(_ context.Context, domain string, rr string, options *optio
 
 	if client, clientErr := a.getClient(options.secret.Ak, options.secret.Sk); nil != clientErr {
 		err = clientErr
-	} else if rsp, ge := client.DescribeDomainRecords(req); nil != ge {
-		err = ge
+	} else if rsp, getErr := client.DescribeDomainRecords(req); nil != getErr {
+		err = getErr
 	} else if nil != rsp && !rsp.IsSuccess() {
 		err = exc.NewFields(`获取域名解析记录出错`, field.String(`domain`, fmt.Sprintf(`%s.%s`, domain, rr)))
 	} else {
@@ -89,24 +93,32 @@ func (a *aliyun) get(_ context.Context, domain string, rr string, options *optio
 	return
 }
 
-func (a *aliyun) delete(_ context.Context, record *Record, options *options) (err error) {
-	req := alidns.CreateDeleteDomainRecordRequest()
-	req.RecordId = record.Id
+func (a *tencentCloud) delete(_ context.Context, record *Record, options *options) (err error) {
+	req := dnspod.NewDeleteRecordRequest()
+	req.Domain = &record.Name
+
+	if id, parseErr := strconv.ParseUint(record.Id, 10, 64); nil != parseErr {
+		err = parseErr
+	} else {
+		req.RecordId = &id
+	}
+	if nil != err {
+		return
+	}
 
 	if client, clientErr := a.getClient(options.secret.Ak, options.secret.Sk); nil != clientErr {
 		err = clientErr
-	} else if rsp, de := client.DeleteDomainRecord(req); nil != de {
+	} else if _, de := client.DeleteRecord(req); nil != de {
 		err = de
-	} else if nil != rsp && !rsp.IsSuccess() {
-		err = exc.NewFields(`删除域名解析记录出错`, field.String(`domain`, record.Final()))
 	}
 
 	return
 }
 
-func (a *aliyun) getClient(ak string, sk string) (client *alidns.Client, err error) {
+func (a *tencentCloud) getClient(ak string, sk string) (client *dnspod.Client, err error) {
 	if cacheClient, ok := a.clients[ak]; !ok {
-		if client, err = alidns.NewClientWithAccessKey("cn-hangzhou", ak, sk); nil != err {
+		credential := common.NewCredential(ak, sk)
+		if client, err = dnspod.NewClient(credential, regions.Guangzhou, profile.NewClientProfile()); nil != err {
 			return
 		}
 		a.clients[ak] = client
