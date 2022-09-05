@@ -1,4 +1,4 @@
-package uda
+package dns
 
 var _ = NewOptions
 

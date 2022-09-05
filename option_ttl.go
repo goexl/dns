@@ -1,4 +1,4 @@
-package uda
+package dns
 
 import (
 	"time"

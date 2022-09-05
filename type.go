@@ -1,4 +1,4 @@
-package uda
+package dns
 
 const (
 	TypeA     Type = `A`

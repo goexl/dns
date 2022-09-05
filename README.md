@@ -1,4 +1,16 @@
-# 盘古 Golang应用程序框架
+# dns
+
+[![编译状态](https://github.ruijc.com:20443/api/badges/goexl/dns/status.svg)](https://github.ruijc.com:20443/goexl/dns)
+[![Golang质量](https://goreportcard.com/badge/github.com/goexl/dns)](https://goreportcard.com/report/github.com/goexl/dns)
+![版本](https://img.shields.io/github/go-mod/go-version/goexl/dns)
+![Docker镜像版本](https://img.shields.io/docker/v/goexl/dns)
+![仓库大小](https://img.shields.io/github/repo-size/goexl/dns)
+![Docker镜像大小](https://img.shields.io/docker/image-size/goexl/dns)
+![最后提交](https://img.shields.io/github/last-commit/goexl/dns)
+![授权协议](https://img.shields.io/github/license/goexl/dns)
+![语言个数](https://img.shields.io/github/languages/count/goexl/dns)
+![最佳语言](https://img.shields.io/github/languages/top/goexl/dns)
+![星星个数](https://img.shields.io/github/stars/goexl/dns?style=social)
 
 一个Golang应用程序快速开发框架，有以下特性
 

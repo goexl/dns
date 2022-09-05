@@ -1,4 +1,4 @@
-package uda
+package dns
 
 import (
 	"github.com/goexl/gox"

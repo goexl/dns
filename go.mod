@@ -1,4 +1,4 @@
-module github.com/goexl/uda
+module github.com/goexl/dns
 
 go 1.18
 
