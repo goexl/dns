@@ -8,7 +8,8 @@ var _ = New
 
 // Client 客户端
 type Client struct {
-	aliyun executor
+	aliyun       executor
+	tencentCloud executor
 
 	options *options
 }
@@ -21,6 +22,7 @@ func New(opts ...option) (client *Client) {
 		opt.apply(client.options)
 	}
 	client.aliyun = newAliyun()
+	client.tencentCloud = newTencentCloud()
 
 	return
 }
@@ -31,10 +33,14 @@ func (c *Client) Add(ctx context.Context, domain string, subdomain string, value
 		opt.apply(_options)
 	}
 
-	switch _options.mode {
-	case modeAliyun:
-		err = c.aliyun.add(ctx, domain, subdomain, value, _options)
+	var _executor executor
+	switch _options.provider {
+	case providerAliyun:
+		_executor = c.aliyun
+	case providerTencentCloud:
+		_executor = c.tencentCloud
 	}
+	err = _executor.add(ctx, domain, subdomain, value, _options)
 
 	return
 }
@@ -74,10 +80,14 @@ func (c *Client) Get(ctx context.Context, domain string, subdomain string, opts 
 		opt.apply(_options)
 	}
 
-	switch _options.mode {
-	case modeAliyun:
-		record, err = c.aliyun.get(ctx, domain, subdomain, _options)
+	var _executor executor
+	switch _options.provider {
+	case providerAliyun:
+		_executor = c.aliyun
+	case providerTencentCloud:
+		_executor = c.tencentCloud
 	}
+	record, err = _executor.get(ctx, domain, subdomain, _options)
 
 	return
 }
@@ -88,10 +98,14 @@ func (c *Client) Update(ctx context.Context, record *Record, value string, opts 
 		opt.apply(_options)
 	}
 
-	switch _options.mode {
-	case modeAliyun:
-		err = c.aliyun.update(ctx, record, value, _options)
+	var _executor executor
+	switch _options.provider {
+	case providerAliyun:
+		_executor = c.aliyun
+	case providerTencentCloud:
+		_executor = c.tencentCloud
 	}
+	err = _executor.update(ctx, record, value, _options)
 
 	return
 }
@@ -102,10 +116,14 @@ func (c *Client) Delete(ctx context.Context, record *Record, opts ...option) (er
 		opt.apply(_options)
 	}
 
-	switch _options.mode {
-	case modeAliyun:
-		err = c.aliyun.delete(ctx, record, _options)
+	var _executor executor
+	switch _options.provider {
+	case providerAliyun:
+		_executor = c.aliyun
+	case providerTencentCloud:
+		_executor = c.tencentCloud
 	}
+	err = _executor.delete(ctx, record, _options)
 
 	return
 }

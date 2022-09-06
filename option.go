@@ -12,25 +12,25 @@ type (
 	}
 
 	options struct {
-		mode   mode
-		secret gox.Secret
-		typ    Type
-		ttl    time.Duration
+		provider provider
+		secret   gox.Secret
+		typ      Type
+		ttl      time.Duration
 	}
 )
 
 func defaultOptions() *options {
 	return &options{
-		mode: modeAliyun,
-		typ:  TypeA,
-		ttl:  10 * time.Minute,
+		provider: providerAliyun,
+		typ:      TypeA,
+		ttl:      10 * time.Minute,
 	}
 }
 
 func (o *options) clone() *options {
 	return &options{
-		mode: o.mode,
-		typ:  o.typ,
-		ttl:  o.ttl,
+		provider: o.provider,
+		typ:      o.typ,
+		ttl:      o.ttl,
 	}
 }
