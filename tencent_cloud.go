@@ -74,7 +74,7 @@ func (a *tencentCloud) get(
 	req := dnspod.NewDescribeRecordListRequest()
 	req.Domain = &domain
 	req.Subdomain = &subdomain
-	typ := options.typ
+	typ := string(options.typ)
 	req.RecordType = &typ
 
 	if client, ce := a.getClient(options.secret.Ak, options.secret.Sk); nil != ce {
@@ -83,7 +83,7 @@ func (a *tencentCloud) get(
 		err = ge
 	} else {
 		for _, _record := range rsp.Response.RecordList {
-			if domain == *_record.Name && options.typ == *_record.Type {
+			if domain == *_record.Name && options.typ == Type(*_record.Type) {
 				record = new(Record)
 				record.Id = strconv.FormatUint(*_record.RecordId, 10)
 				record.Name = *_record.Name
