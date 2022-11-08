@@ -7,7 +7,7 @@ require (
 	github.com/goexl/exc v0.0.4
 	github.com/goexl/gox v0.1.2
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.531
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod v1.0.526
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod v1.0.531
 )
 
 require (
