@@ -6,8 +6,8 @@ require (
 	github.com/aliyun/alibaba-cloud-sdk-go v1.62.218
 	github.com/goexl/exc v0.0.5
 	github.com/goexl/gox v0.2.3
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.609
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod v1.0.609
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.615
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod v1.0.615
 )
 
 require (
