@@ -3,7 +3,7 @@ module github.com/goexl/dns
 go 1.18
 
 require (
-	github.com/aliyun/alibaba-cloud-sdk-go v1.62.618
+	github.com/aliyun/alibaba-cloud-sdk-go v1.62.620
 	github.com/goexl/exc v0.0.5
 	github.com/goexl/gox v0.2.3
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.805
